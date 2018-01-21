@@ -1,0 +1,22 @@
+[
+  {
+    "name": "cat1",
+    "super_name": "hoge"
+  },
+  {
+    "name": "cat2",
+    "super_name": "hoge"
+  },
+  {
+    "name": "moge1",
+    "super_name": "moge"
+  },
+  {
+    "name": "moge2",
+    "super_name": "moge"
+  },
+  {
+    "name": "moge3",
+    "super_name": "moge"
+  }
+]
