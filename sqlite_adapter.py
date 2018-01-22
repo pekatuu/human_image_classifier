@@ -1,11 +1,12 @@
 import json
-
 import os
-from typing import Type, List
+from typing import Type, List, Dict
 
 from peewee import *
 
 DB = SqliteDatabase(None)
+
+TagDict = Dict[str, List[str]]
 
 
 class DatasetInfo(Model):
@@ -38,8 +39,8 @@ class Tag(Model):
 
 
 class ImageToTag(Model):
-    image = ForeignKeyField(Image)
-    tag = ForeignKeyField(Tag)
+    image = ForeignKeyField(Image, related_name="tags")
+    tag = ForeignKeyField(Tag, related_name="images")
 
     class Meta:
         database = DB
@@ -97,26 +98,35 @@ class DBAdapter(object):
     def get_dataset_info(self) -> DatasetInfo:
         return DatasetInfo.select().limit(1)[0]
 
-    def get_image_name(self, image_id):
-        return Image.get(Image.id == image_id).name
+    def get_image(self, image_id) -> Image:
+        return Image.get(Image.id == image_id)
 
-    def get_image_count(self):
+    def get_image_count(self) -> int:
         return Image.select().count()
 
     def get_images(self):
         return Image.select()
 
-    def get_tag_by_name(self, name: str):
+    def get_tag_by_name(self, name: str) -> Tag:
         return Tag.get(Tag.name == name)
 
-    def get_tags(self):
+    def get_tags_by_image_id(self, image_id: int) -> TagDict:
+        image = Image.get(Image.id == image_id)
+        im2tags = image.tags
+        tags = [x.tag for x in im2tags]
+        return self.jsonify_tag_list(tags)
+
+    def get_tags(self) -> TagDict:
+        tags = Tag.select()
+        return self.jsonify_tag_list(tags)
+
+    def jsonify_tag_list(self, tags: List[Tag]) -> TagDict:
         ret = {}
-        for tag in Tag.select():
+        for tag in tags:
             if tag.super_name in ret:
                 ret[tag.super_name].append(tag.name)
             else:
                 ret[tag.super_name] = [tag.name]
-
         return ret
 
     def get_as(self, t: Type[Model], obj):

@@ -41,7 +41,7 @@ def init_flask_admin():
 
 @app.route("/image/<int:image_id>")
 def get_image(image_id: int):
-    image_name = db.get_image_name(image_id)
+    image_name = db.get_image(image_id).name
     image_ext = os.path.splitext(image_name)[1]
     image_path = os.path.join(db.get_dataset_info().image_root, image_name)
     with open(image_path, 'rb') as f:
@@ -51,8 +51,8 @@ def get_image(image_id: int):
 
 
 @app.route("/image/<int:image_id>/tag", methods=["GET"])
-def get_tag(image_id):
-    return jsonify(f"{image_id}")
+def get_tag(image_id: int):
+    return jsonify(db.get_tags_by_image_id(image_id))
 
 
 @app.route("/image/<int:image_id>/tag/<string:tag_name>", methods=["POST"])
